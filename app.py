@@ -1,4 +1,6 @@
 from tkinter import *
+import parser
+
 
 root = Tk()
 root.title("Calculator")
@@ -13,10 +15,43 @@ display.grid(row=1, columnspan=6, sticky=W+E) # Damos el tamaño de las columnas
 indice = 0
 
 
-def get_numbers(n):
+def get_numbers(n): #recibe los numeros
     global indice
     display.insert(indice, n)
     indice+=1
+
+def get_operation(operador): #Enviamos los operadores
+    global indice
+    operador_length = len(operador)
+    display.insert(indice, operador)
+    indice+=operador_length
+
+def clear_display(): #Limpiamos la calcu
+    display.delete(0, END)
+
+def undo(): #Nos permite borrar el ultimo digito ingresado.
+    display_state = display.get()
+    if len(display_state):
+        display_new_state = display_state[:-1]
+        clear_display()
+        display.insert(0, display_new_state) #Recuerda el indice 0 - cero -
+    else:
+        clear_display()
+        display.insert(0, 'Error') 
+
+
+
+def calculate():
+    display_state = display.get()
+    try:
+        math_expression = parser.expr(display_state).compile()
+        result = eval(math_expression)
+        clear_display()
+        display.insert(0, result)
+    except expression as identifier:
+        clear_display()
+        display.insert(0, 'Error')
+
 
 #Numeric Buttons
 Button(root, text= "1", command=lambda:get_numbers(1)).grid(row=2, column=0, sticky=W+E)
@@ -32,21 +67,22 @@ Button(root, text= "8", command=lambda:get_numbers(8)).grid(row=4, column=1, sti
 Button(root, text= "9", command=lambda:get_numbers(9)).grid(row=4, column=2, sticky=W+E)
 
 #Buttons part2
-Button(root, text= "AC").grid(row=5, column=0, sticky=W+E)
-Button(root, text= "0").grid(row=5, column=1, sticky=W+E)
-Button(root, text= "%").grid(row=5, column=2, sticky=W+E)
+Button(root, text= "AC", command=lambda:clear_display()).grid(row=5, column=0, sticky=W+E)
+Button(root, text= "0", command=lambda:get_numbers(0)).grid(row=5, column=1, sticky=W+E)
+Button(root, text= "%", command=lambda:get_operation("%")).grid(row=5, column=2, sticky=W+E)
 
-Button(root, text= "+").grid(row=2, column=3, sticky=W+E)
-Button(root, text= "-").grid(row=3, column=3, sticky=W+E)
-Button(root, text= "*").grid(row=4, column=3, sticky=W+E)
-Button(root, text= "/").grid(row=5, column=3, sticky=W+E)
+Button(root, text= "+", command=lambda:get_operation("+")).grid(row=2, column=3, sticky=W+E)
+Button(root, text= "-", command=lambda:get_operation("-")).grid(row=3, column=3, sticky=W+E)
+Button(root, text= "*", command=lambda:get_operation("*")).grid(row=4, column=3, sticky=W+E)
+Button(root, text= "/", command=lambda:get_operation("/")).grid(row=5, column=3, sticky=W+E)
 
-Button(root, text= "<--").grid(row=2, column=4, sticky=W+E, columnspan=2)
-Button(root, text= "exp").grid(row=3, column=4, sticky=W+E)
-Button(root, text= "^2").grid(row=3, column=5, sticky=W+E)
-Button(root, text= "(").grid(row=4, column=4, sticky=W+E)
-Button(root, text= ")").grid(row=4, column=5, sticky=W+E)
-Button(root, text= "=").grid(row=5, column=4, sticky=W+E, columnspan=2)
+Button(root, text= "<--", command=lambda:undo()).grid(row=2, column=4, sticky=W+E, columnspan=2)
+Button(root, text="exp", command=lambda: get_operation("**")).grid(row=3, column=4, sticky=W+E)
+Button(root, text="^2", command=lambda: get_operation("**2")).grid(row=3, column=5, sticky=W+E)
+Button(root, text= "(", command=lambda:get_operation("(")).grid(row=4, column=4, sticky=W+E)
+Button(root, text= ")", command=lambda:get_operation(")")).grid(row=4, column=5, sticky=W+E)
+Button(root, text="=", command=lambda: calculate()).grid(
+    row=5, column=4, sticky=W+E, columnspan=2)
 
 
 root.mainloop() 
